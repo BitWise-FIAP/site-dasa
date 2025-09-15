@@ -251,17 +251,28 @@ if st.session_state.usuario_logado:
             df.to_excel(writer, index=False, sheet_name='Tabela')
         return output.getvalue()
 
-    # Inicializa o valor se ainda não estiver definido
-    if "valor_insumo" not in st.session_state:
-        st.session_state.valor_insumo = 0
+    for chave in ["valor_seringa", "valor_algodão","valor_gazes","valor_luvas"]:
+        if chave not in st.session_state:
+            st.session_state[chave] = 0
 
     # Criando formulário para adicionar uso dos insumos
     container = st.container()
     col1, col2, col3 = container.columns([1, 2, 1])  # proporções ajustadas
 
     with col2:
+        st.markdown("----------------------------------------------")
         st.subheader("Menu de Insumos")
-        st.number_input("Valor", value=st.session_state.valor_insumo, key="valor_insumo_input")
+        seringa = st.number_input("SERINGA", value=st.session_state.valor_seringa, key="valor_seringa_input")
+        st.number_input("ALGODÃO", value=st.session_state.valor_algodão, key="valor_algodão_input")
+        st.number_input("GAZES", value=st.session_state.valor_gazes, key="valor_gazes_input")
+        st.number_input("LUVAS", value=st.session_state.valor_luvas, key="valor_luvas_input")
+        st.button("Registrar")
+        st.markdown("----------------------------------------------")
+
+    # Adicionando lógica de inserir registros no banco de dados
+    # Estrutura da tabela = ['funcionario','insumo',consumo,'setor',log]
+    agora = datetime.now().strftime("%d/%m/%Y")    
+    tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(usuario), agora]  # valores na ordem das colunas
 
     st.subheader("Exportar para Excel")
     excel_file = to_excel(tabela_final)
