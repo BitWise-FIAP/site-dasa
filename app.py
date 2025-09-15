@@ -264,7 +264,7 @@ if st.session_state.usuario_logado:
 
     if acesso==2 or acesso==0:
         # Exibir conteúdo protegido após login            
-        for chave in ["valor_seringa", "valor_algodao","valor_gazes","valor_luvas"]:
+        for chave in ["valor_seringa", "valor_algodão","valor_gazes","valor_luvas"]:
             if chave not in st.session_state:
                 st.session_state[chave] = 0
 
