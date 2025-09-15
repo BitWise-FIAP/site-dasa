@@ -75,7 +75,6 @@ if not st.session_state.usuario_logado:
                 st.success(f"Bem-vindo, {usuario}!")
                 st.session_state.usuario_logado = True
                 st.session_state.usuario = usuario
-                st.session_state.setor = usuarios_dict[usuario]["setor"]
                 st.rerun()
             else:
                 st.error("Usuário ou senha incorretos!")
@@ -83,7 +82,6 @@ if not st.session_state.usuario_logado:
 # Verificando credenciais 
 if st.session_state.usuario_logado:
     usuario = st.session_state.get("usuario")
-    setor = st.session_state.get("setor")
     # Exibir conteúdo protegido após login
     # Logo do sidebar
     with st.sidebar:
