@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 import streamlit.components.v1 as components
 import xlsxwriter
 import hashlib
+import json
 
 st.set_page_config(layout="wide")
 @st.cache_resource
@@ -30,11 +31,9 @@ def carregando_processando_dados():
 
 # Loadando usuários
 criando_conexao()
-usuarios = os.getenv("USERS")
 usuarios_dict = {}
-for usuario in usuarios.split(","):
-    user, senha = usuario.split(":")
-    usuarios_dict[user] = senha
+with open("users.json","r",encoding="utf-8") as f:
+    usuarios_dict = json.load(f)
 
 # Criando tabela (atualizada a cada interação)
 tabela = pd.read_excel("banco_dasa.xlsx")
@@ -77,7 +76,7 @@ if not st.session_state.usuario_logado:
         if submit:
            # Inserir lógica de buscar usuario/senha no dotenv
 
-            if usuario in usuarios_dict and usuarios_dict[usuario] == senha:
+            if usuario in usuarios_dict and usuarios_dict[usuario]["senha"] == senha:
                 st.success(f"Bem-vindo, {usuario}!")
                 st.session_state.usuario_logado = True
                 st.session_state.usuario = usuario
