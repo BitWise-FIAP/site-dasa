@@ -1,6 +1,10 @@
 {
     "admin":{
         "senha":"123",
+        "acesso":2
+    },
+    "gestor":{
+        "senha":"123",
         "acesso":1
     },
     "func1":{
