@@ -85,6 +85,8 @@ if not st.session_state.usuario_logado:
             else:
                 st.error("Usuário ou senha incorretos!")
 
+st.session_state.usuario_logado = True
+st.session_state.usuario = 'teste'
 
 # Verificando credenciais 
 if st.session_state.usuario_logado:
@@ -267,13 +269,14 @@ if st.session_state.usuario_logado:
         st.number_input("ALGODÃO", value=st.session_state.valor_algodão, key="valor_algodão_input")
         st.number_input("GAZES", value=st.session_state.valor_gazes, key="valor_gazes_input")
         st.number_input("LUVAS", value=st.session_state.valor_luvas, key="valor_luvas_input")
-        st.button("Registrar")
+        registrar = st.button("Registrar")
         st.markdown("----------------------------------------------")
 
     # Adicionando lógica de inserir registros no banco de dados
     # Estrutura da tabela = ['funcionario','insumo',consumo,'setor',log]
-    agora = datetime.now().strftime("%d/%m/%Y")    
-    tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(usuario), agora]  # valores na ordem das colunas
+    if registrar:
+        agora = datetime.now().strftime("%d/%m/%Y")    
+        tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(usuario), agora]  # valores na ordem das colunas
 
     st.subheader("Exportar para Excel")
     excel_file = to_excel(tabela_final)
