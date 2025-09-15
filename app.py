@@ -18,24 +18,23 @@ import streamlit.components.v1 as components
 import xlsxwriter
 import hashlib
 
-load_dotenv()
-
-usuarios = os.getenv("USERS")
-usuarios_dict = {}
-for usuario in usuarios.split(","):
-    user, senha = usuario.split(":")
-    usuarios_dict[user] = senha
-
 st.set_page_config(layout="wide")
 @st.cache_resource
 def criando_conexao():
     load_dotenv() # Carregando .env
 
-
 @st.cache_data
 def carregando_processando_dados():
     teste = 0
     return teste
+
+# Loadando usuários
+criando_conexao()
+usuarios = os.getenv("USERS")
+usuarios_dict = {}
+for usuario in usuarios.split(","):
+    user, senha = usuario.split(":")
+    usuarios_dict[user] = senha
 
 # Criando tabela (atualizada a cada interação)
 tabela = pd.read_excel("banco_dasa.xlsx")
@@ -43,6 +42,18 @@ tabela["Log"] = pd.to_datetime(tabela["Log"])
 
 # Recebendo dados do cache
 teste = carregando_processando_dados()
+
+st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        *{
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins','sans-serif';
+        }
+    </style>
+""",unsafe_allow_html=True)
 
 # Início da página
 if "usuario_logado" not in st.session_state:
@@ -132,7 +143,6 @@ if st.session_state.usuario_logado:
         (tabela["Log"].dt.date >= st.session_state.filtro_data_inicial) &
         (tabela["Log"].dt.date <= st.session_state.filtro_data_final)
     ]
-    header = f"#### Intervalo selecionado: {st.session_state.filtro_data_inicial.strftime("%d/%m/%Y")}  até  {st.session_state.filtro_data_final.strftime("%d/%m/%Y")}"
 
     # Filtro dos insumos no sidebar
     insumos_unicos = sorted(tabela["Insumo"].unique(), key=str) # Obtendo valores únicos
@@ -219,7 +229,9 @@ if st.session_state.usuario_logado:
     #insumos4 = px.pie(df_contagem, values='Total', names='Categoria', title='Controle de insumos')
 
     # Página
-    st.markdown(header)
+    st.markdown(
+        f"<h2>Intervalo selecionado: {st.session_state.filtro_data_inicial.strftime("%d/%m/%Y")}  até  {st.session_state.filtro_data_final.strftime("%d/%m/%Y")}</h2>"        
+    ,unsafe_allow_html=True)
     st.write(f"Bem-vindo de volta, {usuario}!")
 
     container = st.container()  # Criando containers para deixar gráficos lado a lado
