@@ -57,10 +57,10 @@ if not st.session_state.usuario_logado:
     # Criando campos de login
     col1, _, col2 = st.columns([1, 3, 1])  # colunas com espaço no meio
     with col1:
-       # st.image("logo_BITWISE.png", width=360)
-       teste=0
+        st.image("assets/icons/bitwise.png", width=360)
+        teste=0
     with col2:
-       # st.image("LOGO_DASA.png", width=90)
+        st.image("assets/icons/dasa.png", width=90)
         teste=0
 
     with st.form("login_form"):
