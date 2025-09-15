@@ -232,11 +232,18 @@ if st.session_state.usuario_logado:
             df.to_excel(writer, index=False, sheet_name='Tabela')
         return output.getvalue()
 
-    # Criando formulário para adicionar uso dos insumos
-    st.subheader("Menu de Insumos")
-    st.button("adicionar")    
+    # Inicializa o valor se ainda não estiver definido
+    if "valor_insumo" not in st.session_state:
+        st.session_state.valor_insumo = 0
 
-    
+    # Criando formulário para adicionar uso dos insumos
+    container = st.container()
+    col1, col2, col3 = container.columns([1, 2, 1])  # proporções ajustadas
+
+    with col2:
+        st.subheader("Menu de Insumos")
+        st.number_input("Valor", value=st.session_state.valor_insumo, key="valor_insumo_input")
+
     st.subheader("Exportar para Excel")
     excel_file = to_excel(tabela_final)
     # Obtendo dia mes e ano atual para nomear arquivo
