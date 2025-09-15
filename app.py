@@ -97,10 +97,10 @@ if st.session_state.usuario_logado:
         
         if "filtro_data_inicial" or "filtro_data_final" not in st.session_state:
             # Pegar data inicial e final da tabela (delimitar o max e min)
-            st.session_state.filtro_data_inicial = "2025-01-01" # Primeiro valor apresentado
-            st.session_state.filtro_data_final = "2025-12-12"
-            data_inicio = "2025-01-01" # será alterado com o input
-            data_fim = "2025-12-12"
+            st.session_state.filtro_data_inicial = tabela["Data"].min() # Primeiro valor apresentado
+            st.session_state.filtro_data_final = tabela["Data"].max()
+            data_inicio = tabela["Data"].min()
+            data_fim = tabela["Data"].max()
         if "date_input_key" not in st.session_state:
             st.session_state.date_input_key = 0
         with st.sidebar:
