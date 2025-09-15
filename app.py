@@ -263,7 +263,7 @@ if st.session_state.usuario_logado:
     with col2:
         st.markdown("----------------------------------------------")
         st.subheader("Menu de Insumos")
-        st.number_input("SERINGA", value=st.session_state.valor_seringa, key="valor_seringa_input")
+        seringa = st.number_input("SERINGA", value=st.session_state.valor_seringa, key="valor_seringa_input")
         st.number_input("ALGODÃO", value=st.session_state.valor_algodão, key="valor_algodão_input")
         st.number_input("GAZES", value=st.session_state.valor_gazes, key="valor_gazes_input")
         st.number_input("LUVAS", value=st.session_state.valor_luvas, key="valor_luvas_input")
@@ -271,7 +271,9 @@ if st.session_state.usuario_logado:
         st.markdown("----------------------------------------------")
 
     # Adicionando lógica de inserir registros no banco de dados
-    
+    # Estrutura da tabela = ['funcionario','insumo',consumo,'setor',log]
+    agora = datetime.now().strftime("%d/%m/%Y")    
+    tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(usuario), agora]  # valores na ordem das colunas
 
     st.subheader("Exportar para Excel")
     excel_file = to_excel(tabela_final)
