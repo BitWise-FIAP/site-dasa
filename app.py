@@ -272,7 +272,7 @@ if st.session_state.usuario_logado:
 
     if acesso==2 or acesso==0:
         # Exibir conteúdo protegido após login            
-        for chave in ["valor_seringa", "valor_algodão","valor_gazes","valor_luvas"]:
+        for chave in ["valor_seringa", "valor_algodao","valor_gazes","valor_luvas"]:
             if chave not in st.session_state:
                 st.session_state[chave] = 0
 
@@ -305,10 +305,13 @@ if st.session_state.usuario_logado:
                 }
 
                 for insumo, valor in insumos.items():
-                    tabela.loc[len(tabela)] = [str(usuario), insumo, valor, str(setor_selecionado), hora, data]
+                    if valor >0:
+                        tabela.loc[len(tabela)] = [str(usuario), insumo, valor, str(setor_selecionado), hora, data]
 
                 tabela.to_excel("banco_dasa.xlsx", index=False)
                 st.success("Registros salvos com sucesso!")
+                for chave in ["valor_seringa", "valor_algodao","valor_gazes","valor_luvas"]:
+                    del st.session_state[chave]
                 st.rerun()
 
             st.markdown("----------------------------------------------")
