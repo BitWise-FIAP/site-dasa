@@ -20,24 +20,19 @@ import hashlib
 import json
 
 st.set_page_config(layout="wide")
-@st.cache_resource
-def criando_conexao():
-    load_dotenv() # Carregando .env
-
 @st.cache_data
 def carregando_processando_dados():
     teste = 0
     return teste
 
 # Loadando usuários
-criando_conexao()
 usuarios_dict = {}
 with open("users.json","r",encoding="utf-8") as f:
     usuarios_dict = json.load(f)
 
 # Criando tabela (atualizada a cada interação)
 tabela = pd.read_excel("banco_dasa.xlsx")
-tabela["Log"] = pd.to_datetime(tabela["Log"])
+tabela["Data"] = pd.to_datetime(tabela["Data"])
 
 # Recebendo dados do cache
 teste = carregando_processando_dados()
@@ -80,6 +75,7 @@ if not st.session_state.usuario_logado:
                 st.success(f"Bem-vindo, {usuario}!")
                 st.session_state.usuario_logado = True
                 st.session_state.usuario = usuario
+                st.session_state.setor = usuarios_dict[usuario]["setor"]
                 st.rerun()
             else:
                 st.error("Usuário ou senha incorretos!")
@@ -87,6 +83,7 @@ if not st.session_state.usuario_logado:
 # Verificando credenciais 
 if st.session_state.usuario_logado:
     usuario = st.session_state.get("usuario")
+    setor = st.session_state.get("setor")
     # Exibir conteúdo protegido após login
     # Logo do sidebar
     with st.sidebar:
@@ -138,8 +135,8 @@ if st.session_state.usuario_logado:
 
     # Aplica o filtro no DataFrame
     tabela = tabela[
-        (tabela["Log"].dt.date >= st.session_state.filtro_data_inicial) &
-        (tabela["Log"].dt.date <= st.session_state.filtro_data_final)
+        (tabela["Data"].dt.date >= st.session_state.filtro_data_inicial) &
+        (tabela["Data"].dt.date <= st.session_state.filtro_data_final)
     ]
 
     # Filtro dos insumos no sidebar
@@ -181,7 +178,7 @@ if st.session_state.usuario_logado:
         st.rerun()  # Reinicia o app para voltar à tela de login
 
     tabela_final = tabela.copy()
-    tabela_final["Log"] = tabela_final["Log"].dt.strftime("%d/%m/%Y") # Ajustando padrão da data antes de apresentar a tabela
+    tabela_final["Data"] = tabela_final["Data"].dt.strftime("%d/%m/%Y") # Ajustando padrão da data antes de apresentar a tabela
     tabela_final = tabela_final.reset_index(drop=True)
     total_registros = len(tabela_final)
 
@@ -269,13 +266,14 @@ if st.session_state.usuario_logado:
         st.markdown("----------------------------------------------")
 
     # Adicionando lógica de inserir registros no banco de dados
-    # Estrutura da tabela = ['funcionario','insumo',consumo,'setor',log]
+    # Estrutura da tabela = ['funcionario','insumo',consumo,'setor', Hora, Data]
     if registrar:
-        agora = datetime.now().strftime("%d/%m/%Y")    
-        tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(usuario), agora]  # valores na ordem das colunas
-        tabela.loc[len(tabela)] = [str(usuario), 'algodão', st.session_state.valor_algodão, str(usuario), agora]  # valores na ordem das colunas
-        tabela.loc[len(tabela)] = [str(usuario), 'gazes', st.session_state.valor_gazes, str(usuario), agora]  # valores na ordem das colunas
-        tabela.loc[len(tabela)] = [str(usuario), 'luvas', st.session_state.valor_luvas, str(usuario), agora]  # valores na ordem das colunas
+        data = datetime.now().strftime("%d/%m/%Y")  
+        hora = datetime.now().strftime("%H:%M:%S")        
+        tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(setor), hora, data]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'algodão', st.session_state.valor_algodão, str(setor), hora, data]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'gazes', st.session_state.valor_gazes, str(setor), hora, data]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'luvas', st.session_state.valor_luvas, str(setor), hora, data]  # valores na ordem das colunas
 
         tabela.to_excel("banco_dasa.xlsx", index=False)
         st.rerun()
