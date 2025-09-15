@@ -83,10 +83,7 @@ if not st.session_state.usuario_logado:
                 st.rerun()
             else:
                 st.error("Usuário ou senha incorretos!")
-
-st.session_state.usuario_logado = True
-st.session_state.usuario = 'teste'
-
+                
 # Verificando credenciais 
 if st.session_state.usuario_logado:
     usuario = st.session_state.get("usuario")
