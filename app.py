@@ -75,6 +75,7 @@ if not st.session_state.usuario_logado:
                 st.success(f"Bem-vindo, {usuario}!")
                 st.session_state.usuario_logado = True
                 st.session_state.usuario = usuario
+                st.session_state.acesso = usuarios_dict[usuario]["acesso"]
                 st.rerun()
             else:
                 st.error("Usuário ou senha incorretos!")
