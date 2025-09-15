@@ -190,19 +190,27 @@ if st.session_state.usuario_logado:
         '#FF0000',  
         ]
 
-        # Gráfico usos dos insumos
-        df_contagem = tabela_final['Insumo'].value_counts().reset_index()
+        df_contagem = tabela_final.groupby('Insumo')['Consumo'].sum().reset_index()
         df_contagem.columns = ['Categoria', 'Total']
+
+        # Cria a label para mostrar no gráfico
         df_contagem['label'] = df_contagem.apply(
             lambda row: f"{row['Categoria']}: {row['Total']}", axis=1
         )
-        insumos = px.pie(df_contagem, values='Total', names='Categoria', title='Controle de insumos')
+
+        # Gráfico de pizza
+        insumos = px.pie(
+            df_contagem,
+            values='Total',
+            names='Categoria',
+            title='Controle de insumos'
+        )
         insumos.update_traces(
             marker=dict(colors=cores_pizza),
-            textinfo='none',  # Esconde o padrão
-            texttemplate='%{label} %{value} (%{percent})',     # label = categoria, value = total numérico
+            textinfo='none',  # esconde o padrão
+            texttemplate='%{label} %{value} (%{percent})',
             textfont_size=11,
-            textposition='outside',      # importante: coloca o texto DENTRO da fatia
+            textposition='outside',  # coloca o texto fora da fatia
             showlegend=False,
         )
         insumos.update_layout(
@@ -264,7 +272,7 @@ if st.session_state.usuario_logado:
 
     if acesso==2 or acesso==0:
         # Exibir conteúdo protegido após login            
-        for chave in ["valor_seringa", "valor_algodao","valor_gazes","valor_luvas"]:
+        for chave in ["valor_seringa", "valor_algodão","valor_gazes","valor_luvas"]:
             if chave not in st.session_state:
                 st.session_state[chave] = 0
 
@@ -297,13 +305,10 @@ if st.session_state.usuario_logado:
                 }
 
                 for insumo, valor in insumos.items():
-                    if valor > 0:
-                        tabela.loc[len(tabela)] = [str(usuario), insumo, valor, str(setor_selecionado), hora, data]
+                    tabela.loc[len(tabela)] = [str(usuario), insumo, valor, str(setor_selecionado), hora, data]
 
                 tabela.to_excel("banco_dasa.xlsx", index=False)
                 st.success("Registros salvos com sucesso!")
-                for chave in ["valor_seringa", "valor_algodao","valor_gazes","valor_luvas"]:
-                    del st.session_state[chave]
                 st.rerun()
 
             st.markdown("----------------------------------------------")
