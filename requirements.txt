@@ -9,4 +9,3 @@ plotly
 numpy
 xlsxwriter
 python-dotenv
-json
