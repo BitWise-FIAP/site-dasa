@@ -25,15 +25,16 @@ def criando_conexao():
 
 
 @st.cache_data
-def carregando_processando_dados(ttl=86400):
-    tabela = pd.read_excel("banco_dasa.xlsx")
-    tabela["Log"] = pd.to_datetime(tabela["Log"])
+def carregando_processando_dados():
     teste = 0
-    return tabela
+    return teste
+
+# Criando tabela (atualizada a cada interação)
+tabela = pd.read_excel("banco_dasa.xlsx")
+tabela["Log"] = pd.to_datetime(tabela["Log"])
 
 # Recebendo dados do cache
-tabela = carregando_processando_dados()
-
+teste = carregando_processando_dados()
 
 # Início da página
 if "usuario_logado" not in st.session_state:
@@ -230,7 +231,12 @@ if st.session_state.usuario_logado:
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False, sheet_name='Tabela')
         return output.getvalue()
-        
+
+    # Criando formulário para adicionar uso dos insumos
+    st.subheader("Menu de Insumos")
+    st.button("adicionar")    
+
+    
     st.subheader("Exportar para Excel")
     excel_file = to_excel(tabela_final)
     # Obtendo dia mes e ano atual para nomear arquivo
