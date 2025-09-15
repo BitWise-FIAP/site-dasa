@@ -1,6 +1,10 @@
 {
     "admin":{
         "senha":"123",
-        "setor":"Enfermagem"
+        "acesso":1
+    },
+    "func1":{
+        "senha":"123",
+        "acesso":0
     }
 }
