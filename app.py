@@ -275,28 +275,37 @@ if st.session_state.usuario_logado:
         with col2:
             st.markdown("----------------------------------------------")
             st.subheader("Menu de Insumos")
-            st.number_input("SERINGA", value=st.session_state.valor_seringa, key="valor_seringa_input")
-            st.number_input("ALGODÃO", value=st.session_state.valor_algodão, key="valor_algodão_input")
-            st.number_input("GAZES", value=st.session_state.valor_gazes, key="valor_gazes_input")
-            st.number_input("LUVAS", value=st.session_state.valor_luvas, key="valor_luvas_input")
+
+            st.number_input("SERINGA", key="valor_seringa", step=1, format="%d")
+            st.number_input("ALGODÃO", key="valor_algodao", step=1, format="%d")
+            st.number_input("GAZES", key="valor_gazes", step=1, format="%d")
+            st.number_input("LUVAS", key="valor_luvas", step=1, format="%d")
+
             setores = ["Enfermagem", "UTI", "Centro Cirúrgico", "Farmácia", "Consultórios","Limpeza"]
             setor_selecionado = st.selectbox("Selecione o setor", setores)
-            registrar = st.button("Registrar")
+
+            if st.button("Registrar"):
+                data = datetime.now().strftime("%d/%m/%Y")
+                hora = datetime.now().strftime("%H:%M:%S")
+
+                # Insumos e valores em loop para evitar repetir código
+                insumos = {
+                    "seringa": st.session_state.valor_seringa,
+                    "algodão": st.session_state.valor_algodao,
+                    "gazes": st.session_state.valor_gazes,
+                    "luvas": st.session_state.valor_luvas
+                }
+
+                for insumo, valor in insumos.items():
+                    tabela.loc[len(tabela)] = [str(usuario), insumo, valor, str(setor_selecionado), hora, data]
+
+                tabela.to_excel("banco_dasa.xlsx", index=False)
+                st.success("Registros salvos com sucesso!")
+                st.rerun()
+
             st.markdown("----------------------------------------------")
-            if acesso==0 and st.button("Sair"):
+
+            if acesso == 0 and st.button("Sair"):
                 st.session_state.usuario_logado = False
                 st.session_state.nome_usuario = None
-                st.rerun()  # Reinicia o app para voltar à tela de login
-
-        # Adicionando lógica de inserir registros no banco de dados
-        # Estrutura da tabela = ['funcionario','insumo',consumo,'setor', Hora, Data]
-        if registrar:
-            data = datetime.now().strftime("%d/%m/%Y")  
-            hora = datetime.now().strftime("%H:%M:%S")        
-            tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(setor_selecionado), hora, data]  # valores na ordem das colunas
-            tabela.loc[len(tabela)] = [str(usuario), 'algodão', st.session_state.valor_algodão, str(setor_selecionado), hora, data]  # valores na ordem das colunas
-            tabela.loc[len(tabela)] = [str(usuario), 'gazes', st.session_state.valor_gazes, str(setor_selecionado), hora, data]  # valores na ordem das colunas
-            tabela.loc[len(tabela)] = [str(usuario), 'luvas', st.session_state.valor_luvas, str(setor_selecionado), hora, data]  # valores na ordem das colunas     
-            tabela.to_excel("banco_dasa.xlsx", index=False)
-            st.rerun()
-           
+                st.rerun()
