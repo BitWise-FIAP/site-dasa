@@ -262,6 +262,8 @@ if st.session_state.usuario_logado:
         st.number_input("ALGODÃO", value=st.session_state.valor_algodão, key="valor_algodão_input")
         st.number_input("GAZES", value=st.session_state.valor_gazes, key="valor_gazes_input")
         st.number_input("LUVAS", value=st.session_state.valor_luvas, key="valor_luvas_input")
+        setores = ["Enfermagem", "UTI", "Centro Cirúrgico", "Farmácia", "Radiologia"]
+        setor_selecionado = st.selectbox("Selecione o setor", setores)   
         registrar = st.button("Registrar")
         st.markdown("----------------------------------------------")
 
@@ -270,11 +272,10 @@ if st.session_state.usuario_logado:
     if registrar:
         data = datetime.now().strftime("%d/%m/%Y")  
         hora = datetime.now().strftime("%H:%M:%S")        
-        tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(setor), hora, data]  # valores na ordem das colunas
-        tabela.loc[len(tabela)] = [str(usuario), 'algodão', st.session_state.valor_algodão, str(setor), hora, data]  # valores na ordem das colunas
-        tabela.loc[len(tabela)] = [str(usuario), 'gazes', st.session_state.valor_gazes, str(setor), hora, data]  # valores na ordem das colunas
-        tabela.loc[len(tabela)] = [str(usuario), 'luvas', st.session_state.valor_luvas, str(setor), hora, data]  # valores na ordem das colunas
-
+        tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(setor_selecionado), hora, data]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'algodão', st.session_state.valor_algodão, str(setor_selecionado), hora, data]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'gazes', st.session_state.valor_gazes, str(setor_selecionado), hora, data]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'luvas', st.session_state.valor_luvas, str(setor_selecionado), hora, data]  # valores na ordem das colunas     
         tabela.to_excel("banco_dasa.xlsx", index=False)
         st.rerun()
     st.subheader("Exportar para Excel")
