@@ -85,7 +85,7 @@ if st.session_state.usuario_logado:
     # Exibir conteúdo protegido após login
     # Logo do sidebar
     with st.sidebar:
-        #st.image("logo_BITWISE.png")
+        st.image("assets/icons/bitwise.png", width=300)
         st.markdown("----------------")
         container_bar = st.container()  # Criando containers para deixar gráficos lado a lado
         colbar1,colbar2 = container_bar.columns(2)
