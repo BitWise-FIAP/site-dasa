@@ -18,6 +18,14 @@ import streamlit.components.v1 as components
 import xlsxwriter
 import hashlib
 
+load_dotenv()
+
+usuarios = os.getenv("USERS")
+usuarios_dict = {}
+for usuario in usuarios.split(","):
+    user, senha = usuario.split(":")
+    usuarios_dict[user] = senha
+
 st.set_page_config(layout="wide")
 @st.cache_resource
 def criando_conexao():
@@ -57,8 +65,8 @@ if not st.session_state.usuario_logado:
         submit = st.form_submit_button("Entrar")
         if submit:
            # Inserir lógica de buscar usuario/senha no dotenv
-            resultado = True 
-            if resultado == True:
+
+            if usuario in usuarios_dict and usuarios_dict[usuario] == senha:
                 st.success(f"Bem-vindo, {usuario}!")
                 st.session_state.usuario_logado = True
                 st.session_state.usuario = usuario
