@@ -83,7 +83,7 @@ if not st.session_state.usuario_logado:
                 st.rerun()
             else:
                 st.error("Usuário ou senha incorretos!")
-                
+
 # Verificando credenciais 
 if st.session_state.usuario_logado:
     usuario = st.session_state.get("usuario")
@@ -261,7 +261,7 @@ if st.session_state.usuario_logado:
     with col2:
         st.markdown("----------------------------------------------")
         st.subheader("Menu de Insumos")
-        seringa = st.number_input("SERINGA", value=st.session_state.valor_seringa, key="valor_seringa_input")
+        st.number_input("SERINGA", value=st.session_state.valor_seringa, key="valor_seringa_input")
         st.number_input("ALGODÃO", value=st.session_state.valor_algodão, key="valor_algodão_input")
         st.number_input("GAZES", value=st.session_state.valor_gazes, key="valor_gazes_input")
         st.number_input("LUVAS", value=st.session_state.valor_luvas, key="valor_luvas_input")
@@ -273,7 +273,12 @@ if st.session_state.usuario_logado:
     if registrar:
         agora = datetime.now().strftime("%d/%m/%Y")    
         tabela.loc[len(tabela)] = [str(usuario), 'seringa', st.session_state.valor_seringa, str(usuario), agora]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'algodão', st.session_state.valor_algodão, str(usuario), agora]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'gazes', st.session_state.valor_gazes, str(usuario), agora]  # valores na ordem das colunas
+        tabela.loc[len(tabela)] = [str(usuario), 'luvas', st.session_state.valor_luvas, str(usuario), agora]  # valores na ordem das colunas
 
+        tabela.to_excel("banco_dasa.xlsx", index=False)
+        st.rerun()
     st.subheader("Exportar para Excel")
     excel_file = to_excel(tabela_final)
     # Obtendo dia mes e ano atual para nomear arquivo
