@@ -1,0 +1,10 @@
+python-dotenv
+psycopg2-binary
+mysql-connector-python
+pandas
+streamlit
+seaborn
+matplotlib
+plotly
+numpy
+xlsxwriter
