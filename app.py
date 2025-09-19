@@ -196,10 +196,14 @@ if st.session_state.usuario_logado:
         total_registros = len(tabela_final)
 
         # Criando gráficos na mão com python
+        # Tons de azul pulando para mais claro
         cores_pizza = [
-        '#FF00FF',  
-        '#00FF00',  
-        '#FF0000',  
+            '#00193E',  # Azul escuro principal
+            '#005DB6',  # Azul claro
+            '#3399FF',  # Azul mais claro
+            '#66B2FF',  # Azul pastel
+            '#B3D8FF',  # Azul muito claro
+            '#E6F4FF',  # Azul quase branco
         ]
 
         df_contagem = tabela_final.groupby('Insumo')['Consumo'].sum().reset_index()
@@ -210,7 +214,15 @@ if st.session_state.usuario_logado:
             lambda row: f"{row['Categoria']}: {row['Total']}", axis=1
         )
 
-        # Gráfico de pizza
+        # Ordena as fatias para que as maiores fiquem com os tons mais escuros
+        def ordenar_cores_por_valor(df, cores):
+            df_sorted = df.sort_values(by='Total', ascending=False).reset_index(drop=True)
+            cor_map = {cat: cores[i % len(cores)] for i, cat in enumerate(df_sorted['Categoria'])}
+            return [cor_map[cat] for cat in df['Categoria']]
+
+        # Para gráfico de insumos por categoria
+        cores_pizza_ordenadas = ordenar_cores_por_valor(df_contagem, cores_pizza)
+
         insumos = px.pie(
             df_contagem,
             values='Total',
@@ -218,7 +230,7 @@ if st.session_state.usuario_logado:
             title='Controle de insumos'
         )
         insumos.update_traces(
-            marker=dict(colors=cores_pizza),
+            marker=dict(colors=cores_pizza_ordenadas),
             textinfo='none',  # esconde o padrão
             texttemplate='%{label} %{value} (%{percent})',
             textfont_size=11,
@@ -234,15 +246,126 @@ if st.session_state.usuario_logado:
             font_color='#1B3A57',
         )
 
-        # Gráfico 2
-        #insumos2 = px.pie(df_contagem, values='Total', names='Categoria', title='Controle de insumos')
+        # Gráfico 2 - Qtd de insumos por setor (agrupando por setor)
+        df_setor = tabela_final.groupby('Setor')['Consumo'].sum().reset_index()
+        df_setor.columns = ['Setor', 'Total']
+        df_setor['label'] = df_setor.apply(lambda row: f"{row['Setor']}: {row['Total']}", axis=1)
 
-        
-        # Gráfico 3
-        #insumos3 = px.pie(df_contagem, values='Total', names='Categoria', title='Controle de insumos')
+        def ordenar_cores_por_valor_setor(df, cores):
+            df_sorted = df.sort_values(by='Total', ascending=False).reset_index(drop=True)
+            cor_map = {setor: cores[i % len(cores)] for i, setor in enumerate(df_sorted['Setor'])}
+            return [cor_map[setor] for setor in df['Setor']]
 
-        # Gráfico 4
-        #insumos4 = px.pie(df_contagem, values='Total', names='Categoria', title='Controle de insumos')
+        cores_pizza_setor_ordenadas = ordenar_cores_por_valor_setor(df_setor, cores_pizza)
+
+        insumos2 = px.pie(
+            df_setor,
+            values='Total',
+            names='Setor',
+            title='Qtd de insumos por setor'
+        )
+        insumos2.update_traces(
+            marker=dict(colors=cores_pizza_setor_ordenadas),
+            textinfo='none',
+            texttemplate='%{label} %{value} (%{percent})',
+            textfont_size=11,
+            textposition='outside',
+            showlegend=False,
+        )
+        insumos2.update_layout(
+            margin=dict(t=60, b=50, l=110, r=110),
+            height=280,
+            paper_bgcolor='#E6F4FF',
+            plot_bgcolor='#F5FAFF',
+            title_font_color='#1B3A57',
+            font_color='#1B3A57',
+        )
+
+        # Gráfico 3 - Qtd de insumos por hora (agrupando em HH:00)
+        # Extrai a hora no formato HH:00
+        tabela_final['HoraFormatada'] = pd.to_datetime(tabela_final['Hora'], format='%H:%M:%S', errors='coerce').dt.strftime('%H:00')
+        df_hora = tabela_final.groupby('HoraFormatada')['Consumo'].sum().reset_index()
+        df_hora.columns = ['Hora', 'Total']
+        df_hora['label'] = df_hora.apply(lambda row: f"{row['Hora']}: {row['Total']}", axis=1)
+
+        # Para gráfico de insumos por hora
+        def ordenar_cores_por_valor_hora(df, cores):
+            df_sorted = df.sort_values(by='Total', ascending=False).reset_index(drop=True)
+            cor_map = {hora: cores[i % len(cores)] for i, hora in enumerate(df_sorted['Hora'])}
+            return [cor_map[hora] for hora in df['Hora']]
+
+        cores_pizza_hora_ordenadas = ordenar_cores_por_valor_hora(df_hora, cores_pizza)
+
+        insumos3 = px.pie(
+            df_hora,
+            values='Total',
+            names='Hora',
+            title='Qtd de insumos por hora'
+        )
+        insumos3.update_traces(
+            marker=dict(colors=cores_pizza_hora_ordenadas),
+            textinfo='none',
+            texttemplate='%{label} %{value} (%{percent})',
+            textfont_size=11,
+            textposition='outside',
+            showlegend=False,
+        )
+        insumos3.update_layout(
+            margin=dict(t=60, b=50, l=110, r=110),
+            height=280,
+            paper_bgcolor='#E6F4FF',
+            plot_bgcolor='#F5FAFF',
+            title_font_color='#1B3A57',
+            font_color='#1B3A57',
+        )
+
+        # Garante que todas as horas de 00:00 até 23:00 estejam presentes no gráfico
+        horas_completas = [f"{h:02d}:00" for h in range(24)]
+        df_hora_completo = pd.DataFrame({'Hora': horas_completas})
+        df_hora_completo = df_hora_completo.merge(df_hora, on='Hora', how='left').fillna({'Total': 0, 'label': ''})
+
+        # Gráfico 4 - Qtd de insumos por hora em colunas (bar chart)
+        insumos4 = px.bar(
+            df_hora_completo,
+            x='Hora',
+            y='Total',
+            text='Total',
+            title='Qtd de insumos por hora',
+            color='Hora',
+            color_discrete_sequence=cores_pizza_hora_ordenadas
+        )
+        insumos4.update_traces(
+            texttemplate='%{y}',
+            textposition='outside',  # Valor fora da barra, no topo
+            textfont=dict(color='#1B3A57'),  # Azul escuro para texto
+            marker_line_width=0,  # Remove bordas das barras
+        )
+        insumos4.update_layout(
+            margin=dict(t=45, b=5, l=5, r=5),  # Margens mínimas
+            height=280,  # Menor altura para barras menos altas
+            paper_bgcolor='#E6F4FF',
+            plot_bgcolor='#F5FAFF',
+            title_font_color='#1B3A57',
+            font_color='#1B3A57',
+            xaxis_title='Hora',
+            yaxis_title='Total',
+            showlegend=False,
+            xaxis=dict(
+                tickmode='array',
+                tickvals=horas_completas,
+                ticktext=horas_completas,
+                tickfont=dict(color='#1B3A57', size=13),
+                showgrid=False,
+                showline=True,
+                linecolor='#1B3A57',
+            ),
+            yaxis=dict(
+                showgrid=False,
+                showline=True,
+                linecolor='#1B3A57',
+            ),
+            bargap=0.01,  # Barras mais largas
+        )
 
         # Página
         st.markdown(
@@ -254,11 +377,38 @@ if st.session_state.usuario_logado:
         col1,col2 = container.columns(2)
 
         col1.plotly_chart(insumos, use_container_width=True)
-        #col2.plotly_chart(insumos2, use_container_width=True)
+        col2.plotly_chart(insumos2, use_container_width=True)
 
-        col3,col4 = container.columns(2)
-        #col3.plotly_chart(insumos3)
-        #col4.plotly_chart(insumos4)
+        # Gráfico de barras esticado abaixo dos dois gráficos de pizza
+        st.plotly_chart(insumos4, use_container_width=True)
+        # Ajusta altura das barras para ficarem mais visíveis e o gráfico menor
+        insumos4.update_layout(
+            height=120,  # altura menor para barras mais proporcionais e visualização melhor
+            margin=dict(t=5, b=5, l=5, r=5),
+            paper_bgcolor='#E6F4FF',
+            plot_bgcolor='#F5FAFF',
+            title_font_color='#1B3A57',
+            font_color='#1B3A57',
+            xaxis_title='Hora',
+            yaxis_title='Total',
+            showlegend=False,
+            xaxis=dict(
+                tickmode='array',
+                tickvals=horas_completas,
+                ticktext=horas_completas,
+                tickfont=dict(color='#1B3A57', size=13),
+                showgrid=False,
+                showline=True,
+                linecolor='#1B3A57',
+            ),
+            yaxis=dict(
+                showgrid=False,
+                showline=True,
+                linecolor='#1B3A57',
+            ),
+            bargap=0.05,
+        )
+
         st.subheader("Relatório")
         st.dataframe(tabela_final, height=350)
         st.markdown(f"📌 Total de registros: {total_registros}")
