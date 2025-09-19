@@ -49,6 +49,18 @@ st.markdown("""
     </style>
 """,unsafe_allow_html=True)
 
+st.markdown("""
+    <style>
+        .bloco-borda {
+            border: 2px solid #1B3A57;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 18px;
+            background: #F5FAFF;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Início da página
 if "usuario_logado" not in st.session_state:
     st.session_state.usuario_logado = False
@@ -234,7 +246,7 @@ if st.session_state.usuario_logado:
 
         # Página
         st.markdown(
-            f"<h2>Intervalo selecionado: {st.session_state.filtro_data_inicial.strftime("%d/%m/%Y")}  até  {st.session_state.filtro_data_final.strftime("%d/%m/%Y")}</h2>"        
+            f"<h2>Intervalo selecionado: {st.session_state.filtro_data_inicial.strftime('%d/%m/%Y')}  até  {st.session_state.filtro_data_final.strftime('%d/%m/%Y')}</h2>"        
         ,unsafe_allow_html=True)
         st.write(f"Bem-vindo de volta, {usuario}!")
 
@@ -280,43 +292,70 @@ if st.session_state.usuario_logado:
         container = st.container()
         col1, col2, col3 = container.columns([1, 2, 1])  # proporções ajustadas
 
+        setores = ["Enfermagem", "UTI", "Centro Cirúrgico", "Farmácia", "Consultórios","Limpeza"]
+        if "setor_selecionado" not in st.session_state:
+            st.session_state.setor_selecionado = setores[0]
+
         with col2:
-            st.markdown("----------------------------------------------")
-            st.subheader("Menu de Insumos")
-
-            st.number_input("SERINGA", key="valor_seringa", step=1, format="%d")
-            st.number_input("ALGODÃO", key="valor_algodao", step=1, format="%d")
-            st.number_input("GAZES", key="valor_gazes", step=1, format="%d")
-            st.number_input("LUVAS", key="valor_luvas", step=1, format="%d")
-
-            setores = ["Enfermagem", "UTI", "Centro Cirúrgico", "Farmácia", "Consultórios","Limpeza"]
-            setor_selecionado = st.selectbox("Selecione o setor", setores)
-
-            if st.button("Registrar"):
-                data = datetime.now().strftime("%d/%m/%Y")
-                hora = datetime.now().strftime("%H:%M:%S")
-
-                # Insumos e valores em loop para evitar repetir código
-                insumos = {
-                    "seringa": st.session_state.valor_seringa,
-                    "algodão": st.session_state.valor_algodao,
-                    "gazes": st.session_state.valor_gazes,
-                    "luvas": st.session_state.valor_luvas
-                }
-
-                for insumo, valor in insumos.items():
-                    if valor >0:
-                        tabela.loc[len(tabela)] = [str(usuario), insumo, valor, str(setor_selecionado), hora, data]
-
-                tabela.to_excel("banco_dasa.xlsx", index=False)
-                st.success("Registros salvos com sucesso!")
-                for chave in ["valor_seringa", "valor_algodao","valor_gazes","valor_luvas"]:
-                    del st.session_state[chave]
-                st.rerun()
-
-            st.markdown("----------------------------------------------")
-
-            if acesso == 0 and st.button("Sair"):
-                st.session_state.usuario_logado = False
-                st.session_state.nome_usuario = None
-                st.rerun()
+            if st.session_state.get("show_confirm_box", False):
+                st.warning("Deseja realmente registrar os insumos?")
+                insumos = st.session_state.insumos_confirmacao
+                setor = st.session_state.setor_confirmacao
+                st.write("<b>Insumos a serem registrados:</b>", unsafe_allow_html=True)
+                for nome, valor in insumos.items():
+                    if valor > 0:
+                        st.write(f"- {nome}: {valor}")
+                st.write(f"<b>Setor:</b> {setor}", unsafe_allow_html=True)
+                col_confirm, col_cancel = st.columns([1,1])
+                confirm_clicked = col_confirm.button("Confirmar Registro")
+                cancel_clicked = col_cancel.button("Cancelar")
+                if confirm_clicked:
+                    data = datetime.now().strftime("%d/%m/%Y")
+                    hora = datetime.now().strftime("%H:%M:%S")
+                    for insumo, valor in insumos.items():
+                        if valor > 0:
+                            tabela.loc[len(tabela)] = [str(usuario), insumo, valor, str(setor), hora, data]
+                    tabela.to_excel("banco_dasa.xlsx", index=False)
+                    st.success("Registros salvos com sucesso!")
+                    for chave in ["valor_seringa", "valor_algodao","valor_gazes","valor_luvas"]:
+                        st.session_state[chave] = 0
+                    st.session_state.show_confirm_box = False
+                    del st.session_state.insumos_confirmacao
+                    del st.session_state.setor_confirmacao
+                    st.rerun()
+                elif cancel_clicked:
+                    # Restaura os valores nos inputs
+                    st.session_state.valor_seringa = insumos["seringa"]
+                    st.session_state.valor_algodao = insumos["algodão"]
+                    st.session_state.valor_gazes = insumos["gazes"]
+                    st.session_state.valor_luvas = insumos["luvas"]
+                    st.session_state.setor_selecionado = setor
+                    st.session_state.show_confirm_box = False
+                    del st.session_state.insumos_confirmacao
+                    del st.session_state.setor_confirmacao
+                    st.rerun()
+            else:
+                st.markdown("----------------------------------------------")
+                st.subheader("Menu de Insumos")
+                st.number_input("SERINGA", key="valor_seringa", step=1, format="%d")
+                st.number_input("ALGODÃO", key="valor_algodao", step=1, format="%d")
+                st.number_input("GAZES", key="valor_gazes", step=1, format="%d")
+                st.number_input("LUVAS", key="valor_luvas", step=1, format="%d")
+                setor_selecionado = st.selectbox("Selecione o setor", setores, index=setores.index(st.session_state.setor_selecionado))
+                registrar_clicked = st.button("Registrar")
+                if registrar_clicked:
+                    st.session_state.insumos_confirmacao = {
+                        "seringa": st.session_state.valor_seringa,
+                        "algodão": st.session_state.valor_algodao,
+                        "gazes": st.session_state.valor_gazes,
+                        "luvas": st.session_state.valor_luvas
+                    }
+                    st.session_state.setor_confirmacao = setor_selecionado
+                    st.session_state.setor_selecionado = setor_selecionado
+                    st.session_state.show_confirm_box = True
+                    st.rerun()
+                st.markdown("----------------------------------------------")
+                if acesso == 0 and st.button("Sair"):
+                    st.session_state.usuario_logado = False
+                    st.session_state.nome_usuario = None
+                    st.rerun()
